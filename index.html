@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍯 حاسبة Medovik العلمية الشاملة</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* أنماط إضافية للتحميل والنوافذ المنبثقة */
+        .loading-spinner {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.2em;
+            color: white;
+        }
+
+        .modal-overlay {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .chemistry-controls {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .compatibility-alerts {
+            margin-bottom: 20px;
+        }
+
+        .comparison-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .comparison-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        /* أنماط التحميل المحسنة */
+        .loading-state {
+            cursor: wait !important;
+            position: relative;
+            opacity: 0.7;
+        }
+
+        .loading-state::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 20px;
+            height: 20px;
+            margin: -10px 0 0 -10px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .app-control {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        /* منع التحديد النصي أثناء التحميل */
+        body.loading {
+            cursor: wait;
+            user-select: none;
+        }
+
+        /* أنماط النوافذ المنبثقة المحسنة */
+        .modal-overlay {
+            animation: modalFadeIn 0.3s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { 
+                opacity: 0;
+                transform: scale(0.9) translateY(-20px);
+            }
+            to { 
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .error-modal {
+            border-left: 4px solid #d32f2f;
+        }
+
+        .success-modal {
+            border-left: 4px solid #4CAF50;
+        }
+
+        .warning-modal {
+            border-left: 4px solid #FF9800;
+        }
+
+        /* تحسينات الاستجابة */
+        @media (max-width: 768px) {
+            .tab-buttons {
+                flex-direction: column;
+            }
+            
+            .tab-btn {
+                margin-bottom: 5px;
+                text-align: center;
+            }
+            
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .loading-state::after {
+                width: 16px;
+                height: 16px;
+                margin: -8px 0 0 -8px;
+            }
+            
+            .app-control {
+                min-height: 44px; /* تحسين اللمس على المحمول */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .tab-btn {
+                font-size: 0.8em;
+                padding: 6px 8px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+            
+            h2 {
+                font-size: 1.3em;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .button-group .btn {
+                width: 100%;
+            }
+        }
+
+        /* تحسينات إضافية للكيمياء */
+        .chemistry-metric {
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .chemistry-metric .metric-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .chemistry-metric .metric-description {
+            color: var(--text-muted);
+            font-size: 0.9em;
+        }
+        
+        .compatibility-score {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+
+        /* تحسينات شريط الحلاوة */
+        .sweetness-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 5px 0;
+        }
+
+        .sweetness-fill {
+            height: 100%;
+            transition: all 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .sweetness-adjuster-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .sweetness-indicator {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍯 حاسبة Medovik العلمية الشاملة</h1>
+            <p class="subtitle">الأداة المتكاملة لتحليل، محاكاة، وتخصيص وصفات الميدوفيك بدقة علمية.</p>
+        </header>
+
+        <div class="tabs-container">
+            <div class="tab-buttons">
+                <button class="tab-btn active app-control" data-tab="analyzer">📊 المحلل العلمي</button>
+                <button class="tab-btn app-control" data-tab="advisor">🔬 المستشار العلمي</button>
+                <button class="tab-btn app-control" data-tab="method">📖 الطريقة والمحاكاة</button>
+                <button class="tab-btn app-control" data-tab="tempering">🧪 حاسبة التمبرنج</button>
+                <button class="tab-btn app-control" data-tab="scaling">📐 حاسبة الطبقات</button>
+                <button class="tab-btn app-control" data-tab="filling">🍰 حاسبة الحشو الذكية</button>
+                <button class="tab-btn app-control" data-tab="troubleshooting">🔧 مستكشف المشاكل</button>
+                <button class="tab-btn app-control" data-tab="chemistry-report">🧪 التقرير الكيميائي</button>
+                <button class="tab-btn app-control" data-tab="library">💾 مكتبة الوصفات</button>
+            </div>
+
+            <div class="tab-content">
+                <!-- ================= TAB 1: المحلل العلمي ================= -->
+                <div class="tab-panel active" id="analyzer">
+                    <h2>📊 المحلل العلمي للوصفة</h2>
+                    <div class="text-parser-section">
+                        <h3>📝 محلل الوصفات السريع (انسخ والصق)</h3>
+                        <textarea id="recipe-text-input" placeholder="مثال: 500 جرام دقيق، 120 جرام زبدة، 3 بيضات..." rows="4"></textarea>
+                        <div class="button-group">
+                            <button class="btn btn-primary app-control" id="parse-text-btn">🔍 تحليل النص</button>
+                        </div>
+                    </div>
+                    
+                    <h3>مقادير الوصفة (جرام)</h3>
+                    <div class="input-grid">
+                        <div class="input-group"><label for="flour">دقيق:</label><input type="number" id="flour" value="500" min="0"></div>
+                        <div class="input-group"><label for="butter">زبدة:</label><input type="number" id="butter" value="120" min="0"></div>
+                        <div class="input-group"><label for="sugar">سكر:</label><input type="number" id="sugar" value="200" min="0"></div>
+                        <div class="input-group"><label for="honey">عسل:</label><input type="number" id="honey" value="100" min="0"></div>
+                        <div class="input-group"><label for="eggs">بيض:</label><input type="number" id="eggs" value="95" min="0"></div>
+                        <div class="input-group"><label for="soda">صودا الخبز:</label><input type="number" id="soda" value="5.5" min="0" step="0.1"></div>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-success app-control" id="analyze-btn">🧪 تحليل الوصفة</button>
+                        <button class="btn btn-secondary app-control" id="reset-btn">🔄 إعادة للقيم المثالية</button>
+                    </div>
+
+                    <div id="analysis-results-wrapper"></div>
+                </div>
+
+                <!-- ================= TAB 2: المستشار العلمي ================= -->
+                <div class="tab-panel" id="advisor">
+                    <h2>🔬 المستشار العلمي المفصل</h2>
+                    <div class="alert alert-info">احصل على تحليل تفصيلي لتأثير كل مكون على وصفتك، مع حلول علمية مقترحة لتحقيق التوازن المثالي.</div>
+                    <div id="advisor-report-container"><p>قم بتحليل وصفتك أولاً في تبويب "المحلل العلمي" لعرض التقرير.</p></div>
+                </div>
+
+                <!-- ================= TAB 3: الطريقة والمحاكاة ================= -->
+                <div class="tab-panel" id="method">
+                    <h2>📖 الطريقة والمحاكاة</h2>
+                    <div class="toggle-buttons">
+                        <button class="btn-toggle active app-control" data-method="scientific">🔬 الطريقة العلمية (مستحسن)</button>
+                        <button class="btn-toggle app-control" data-method="all-in-one">⚡ طريقة الكل دفعة واحدة (للمحترفين)</button>
+                    </div>
+                    <div id="method-display-container"></div>
+                    <div class="oven-simulator-section">
+                        <h3>🔥 محاكاة تأثير الفرن</h3>
+                        <div class="input-grid small">
+                            <div class="input-group"><label for="oven-temp">درجة حرارة الفرن (°C):</label><input type="number" id="oven-temp" value="180" min="150" max="220"></div>
+                            <div class="input-group"><label for="baking-time">مدة الخبز (دقائق):</label><input type="number" id="baking-time" value="7" min="4" max="15"></div>
+                        </div>
+                        <button class="btn btn-primary app-control" id="simulate-baking-btn">🔥 محاكاة الخبز</button>
+                        <div id="baking-simulation-results" class="result-box" style="display: none;"></div>
+                    </div>
+                </div>
+                
+                <!-- ================= TAB 4: حاسبة التمبرنج ================= -->
+                <div class="tab-panel" id="tempering">
+                    <h2>🧪 حاسبة التمبرنج الدقيقة</h2>
+                    <div class="alert alert-info">تستخدم هذه الحاسبة المعادلات الفيزيائية الصحيحة (مع مراعاة السعة الحرارية المختلفة) لضمان عدم تخثر البيض.</div>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label for="tempering-egg-mass">كتلة البيض (جم):</label>
+                            <input type="number" id="tempering-egg-mass" value="95" min="1">
+                        </div>
+                        <div class="input-group">
+                            <label for="tempering-egg-temp">حرارة البيض (°C):</label>
+                            <input type="number" id="tempering-egg-temp" value="20" min="0" max="30">
+                        </div>
+                        <div class="input-group">
+                            <label for="tempering-liquid-mass">كتلة الخليط الساخن (جم):</label>
+                            <input type="number" id="tempering-liquid-mass" value="425.5" min="1">
+                        </div>
+                        <div class="input-group">
+                            <label for="tempering-liquid-temp">حرارة الخليط الساخن (°C):</label>
+                            <input type="number" id="tempering-liquid-temp" value="85" min="60" max="120">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label for="tempering-batch-count">عدد الدفعات:</label>
+                        <select id="tempering-batch-count" class="app-control">
+                            <option value="3">3 دفعات</option>
+                            <option value="4">4 دفعات</option>
+                            <option value="5" selected>5 دفعات (الأكثر أمانًا)</option>
+                            <option value="6">6 دفعات</option>
+                        </select>
+                    </div>
+                    <div class="button-group">
+                        <button class="btn btn-primary app-control" id="calculate-tempering-btn">🧮 حساب التمبرنج الآمن</button>
+                        <button class="btn btn-secondary app-control" id="autofill-tempering-btn">🔄 تعبئة من الوصفة</button>
+                    </div>
+                    <div id="tempering-results-container"></div>
+                </div>
+
+                <!-- ================= TAB 5: حاسبة الطبقات ================= -->
+                <div class="tab-panel" id="scaling">
+                    <h2>📐 حاسبة الطبقات (السكيلنج)</h2>
+                    <div class="toggle-buttons" id="scaling-mode-toggle">
+                        <button class="btn-toggle active app-control" data-mode="normal">الحاسبة العادية</button>
+                        <button class="btn-toggle app-control" data-mode="advanced">السكيلنج المتقدم</button>
+                        <button class="btn-toggle app-control" data-mode="reverse">الحاسبة العكسية</button>
+                    </div>
+                    <div class="scaling-mode-panel active" data-panel="normal">
+                        <h3>الحاسبة العادية: كم طبقة يمكن صنعها؟</h3>
+                        <div class="pan-shape-selector" data-target="normal">
+                            <label><input type="radio" name="pan-shape-normal" value="round" checked> دائرية</label>
+                            <label><input type="radio" name="pan-shape-normal" value="rectangle"> مستطيلة</label>
+                        </div>
+                        <div id="pan-inputs-normal"></div>
+                        <div class="input-group">
+                            <label for="layer-thickness-normal">سماكة الطبقة (ملم):</label>
+                            <input type="number" id="layer-thickness-normal" value="3" min="1" max="5" step="0.5">
+                        </div>
+                        <button class="btn btn-primary app-control" id="calculate-layers-normal-btn">📏 حساب عدد الطبقات</button>
+                    </div>
+                    <div class="scaling-mode-panel" data-panel="advanced">
+                        <h3>السكيلنج المتقدم: تعديل الوصفة لوزن معين</h3>
+                        <div class="input-group">
+                            <label for="target-layer-weight">وزن كل طبقة (جم):</label>
+                            <input type="number" id="target-layer-weight" value="150" min="50" max="300">
+                        </div>
+                        <div class="input-group">
+                            <label for="target-layer-count">عدد الطبقات المطلوب:</label>
+                            <input type="number" id="target-layer-count" value="8" min="1" max="20">
+                        </div>
+                        <div class="input-group">
+                            <label for="extra-for-crumbs">نسبة زائدة للفتات (%):</label>
+                            <input type="number" id="extra-for-crumbs" value="10" min="0" max="30">
+                        </div>
+                        <button class="btn btn-primary app-control" id="calculate-scaling-advanced-btn">⚖️ حساب المقادير الجديدة</button>
+                    </div>
+                    <div class="scaling-mode-panel" data-panel="reverse">
+                        <h3>الحاسبة العكسية: ما المقادير لعدد طبقات معين؟</h3>
+                        <div class="pan-shape-selector" data-target="reverse">
+                            <label><input type="radio" name="pan-shape-reverse" value="round" checked> دائرية</label>
+                            <label><input type="radio" name="pan-shape-reverse" value="rectangle"> مستطيلة</label>
+                        </div>
+                        <div id="pan-inputs-reverse"></div>
+                        <div class="input-group">
+                            <label for="target-layers-reverse">عدد الطبقات المطلوب:</label>
+                            <input type="number" id="target-layers-reverse" value="8" min="1" max="20">
+                        </div>
+                        <div class="input-group">
+                            <label for="layer-thickness-reverse">سماكة الطبقة (ملم):</label>
+                            <input type="number" id="layer-thickness-reverse" value="3" min="1" max="5" step="0.5">
+                        </div>
+                        <button class="btn btn-primary app-control" id="calculate-scaling-reverse-btn">🔄 حساب المقادير</button>
+                    </div>
+                    <div id="scaling-results-container"></div>
+                </div>
+
+                <!-- ================= TAB 6: حاسبة الحشو الذكية (محدث) ================= -->
+                <div class="tab-panel" id="filling">
+                    <h2>🍰 حاسبة الحشوات الذكية</h2>
+                    <div class="alert alert-info">نظام متطور لحساب وتحليل الحشوات مع بروتوكولات تحضير علمية مفصلة</div>
+                    
+                    <!-- اختيار نوع الإدخال -->
+                    <div class="filling-mode-selector">
+                        <button class="mode-btn active app-control" data-mode="preset">📚 من القوالب الجاهزة</button>
+                        <button class="mode-btn app-control" data-mode="custom">✏️ إدخال مخصص</button>
+                    </div>
+                    
+                    <!-- وضع القوالب الجاهزة -->
+                    <div id="preset-mode" class="filling-mode active">
+                        <div class="input-group">
+                            <label for="filling-preset-selector">اختر نوع الحشوة:</label>
+                            <select id="filling-preset-selector" class="app-control">
+                                <option value="">-- اختر حشوة --</option>
+                                <optgroup label="الحشوات الكلاسيكية">
+                                    <option value="classic-smetana">سميتانا كلاسيكي (قليل الحلاوة)</option>
+                                    <option value="dulce">دولسي دي ليتشي (حلو جداً)</option>
+                                    <option value="cheese-cream">جبن كريمي مستقر (متوازن)</option>
+                                    <option value="custard">كاسترد زبدة (متوسط)</option>
+                                </optgroup>
+                                <optgroup label="وصفات أحمد شوقي">
+                                    <option value="ahmed-1">كريمة كراميل بالزبدة</option>
+                                    <option value="ahmed-2">كريمة سكر خفيفة</option>
+                                    <option value="ahmed-3">حليب مكثف غني</option>
+                                </optgroup>
+                                <optgroup label="وصفات أخرى">
+                                    <option value="abdelsalam">أحمد عبد السلام (زبدة-جبن-دولسي)</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                        
+                        <!-- عرض المقادير القابلة للتعديل -->
+                        <div id="preset-ingredients-container"></div>
+                        
+                        <!-- عرض بروتوكول التحضير -->
+                        <div id="preparation-protocol-container" style="display:none;"></div>
+                        
+                        <!-- التحكم في الحلاوة -->
+                        <div class="sweetness-control" style="display:none;">
+                            <h4>تعديل مستوى الحلاوة:</h4>
+                            <div class="sweetness-adjuster-container">
+                                <label for="sweetness-adjuster">نسبة تقليل الحلاوة:</label>
+                                <input type="range" id="sweetness-adjuster" min="0" max="30" value="0" step="5" class="app-control">
+                                <span id="sweetness-reduction-value">0%</span>
+                            </div>
+                            <div class="sweetness-indicator">
+                                <div class="sweetness-bar">
+                                    <div class="sweetness-fill"></div>
+                                </div>
+                                <span id="sweetness-level-text">محسوب...</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- وضع الإدخال المخصص -->
+                    <div id="custom-mode" class="filling-mode">
+                        <h4>أدخل مكونات الحشوة المخصصة:</h4>
+                        <div class="custom-ingredients-grid">
+                            <div class="input-group">
+                                <label for="custom-sour-cream">قشطة رائبة/سميتانا (جم):</label>
+                                <input type="number" id="custom-sour-cream" value="0" min="0">
+                            </div>
+                            <div class="input-group">
+                                <label for="custom-whipping-cream">كريمة خفق (جم):</label>
+                                <input type="number" id="custom-whipping-cream" value="0" min="0">
+                            </div>
+                            <div class="input-group">
+                                <label for="custom-cream-cheese">جبن كريمي (جم):</label>
+                                <input type="number" id="custom-cream-cheese" value="0" min="0">
+                            </div>
+                            <div class="input-group">
+                                <label for="custom-condensed-milk">حليب مكثف محلى (جم):</label>
+                                <input type="number" id="custom-condensed-milk" value="0" min="0">
+                            </div>
+                            <div class="input-group">
+                                <label for="custom-dulce">دولسي دي ليتشي (جم):</label>
+                                <input type="number" id="custom-dulce" value="0" min="0">
+                            </div>
+                            <div class="input-group">
+                                <label for="custom-butter">زبدة (جم):</label>
+                                <input type="number" id="custom-butter" value="0" min="0">
+                            </div>
+                            <div class="input-group">
+                                <label for="custom-powdered-sugar">سكر بودرة (جم):</label>
+                                <input type="number" id="custom-powdered-sugar" value="0" min="0">
+                            </div>
+                            <div class="input-group">
+                                <label for="custom-honey">عسل (جم):</label>
+                                <input type="number" id="custom-honey" value="0" min="0">
+                            </div>
+                            <div class="input-group">
+                                <label for="custom-other">مكونات أخرى (جم):</label>
+                                <input type="number" id="custom-other" value="0" min="0">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- معايير الكيكة -->
+                    <div class="cake-parameters">
+                        <h4>مواصفات الكيكة:</h4>
+                        <div class="input-grid">
+                            <div class="input-group">
+                                <label for="filling-pan-shape">شكل الصينية:</label>
+                                <select id="filling-pan-shape" class="app-control">
+                                    <option value="round">دائرية</option>
+                                    <option value="rectangle">مستطيلة</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="filling-pan-dimensions"></div>
+                        <div class="input-grid small">
+                            <div class="input-group">
+                                <label for="filling-layers">عدد الطبقات:</label>
+                                <input type="number" id="filling-layers" value="8" min="2" max="20">
+                            </div>
+                            <div class="input-group">
+                                <label for="filling-thickness">سُمك طبقة الحشو (مم):</label>
+                                <input type="number" id="filling-thickness" value="5" min="2" max="10">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button class="btn btn-primary app-control" id="calculate-filling-btn">⚖️ احسب الكميات وحلل الحشوة</button>
+                    </div>
+                    
+                    <!-- عرض النتائج -->
+                    <div id="filling-results-container"></div>
+                </div>
+
+                <!-- ================= TAB 7: مستكشف المشاكل ================= -->
+                <div class="tab-panel" id="troubleshooting">
+                    <h2>🔧 مستكشف المشاكل وإصلاحها</h2>
+                    <div id="troubleshooting-wizard-container"></div>
+                </div>
+				
+                <!-- ================= TAB 8: التقرير الكيميائي الشامل (محدث) ================= -->
+                <div class="tab-panel" id="chemistry-report">
+                    <h2>🧪 التقرير الكيميائي الشامل</h2>
+                    <div class="alert alert-info">
+                        <h4>📊 تحليل التوافق العلمي المتقدم</h4>
+                        <p>يعرض هذا التقرير التحليل الكيميائي المتكامل للعجين والحشوة، ويقيم درجة التوافق بينهما بناءً على معايير علمية.</p>
+                    </div>
+                    
+                    <div class="compatibility-alerts" id="compatibility-alerts-container">
+                        <!-- سيتم ملؤه بالتنبيهات تلقائياً -->
+                    </div>
+                
+                    <div id="compatibility-report-container">
+                        <!-- سيتم ملؤه بالتقرير تلقائياً -->
+                    </div>
+                
+                    <div class="chemistry-controls" style="margin-top: 30px; display: none;" id="chemistry-controls">
+                        <h4>🔧 أدوات متقدمة</h4>
+                        <div class="input-grid">
+                            <div class="input-group">
+                                <label for="dough-temp-input">حرارة العجين للفرد (°C):</label>
+                                <input type="number" id="dough-temp-input" value="40" min="30" max="50" step="1">
+                                <small>أدخل حرارة العجين الفعلية أثناء الفرد</small>
+                            </div>
+                            <div class="input-group">
+                                <label for="filling-temp-input">حرارة تقديم الحشوة (°C):</label>
+                                <input type="number" id="filling-temp-input" value="10" min="4" max="20" step="1">
+                                <small>لحساب اللزوجة بدقة أكبر</small>
+                            </div>
+                        </div>
+                        <div class="button-group">
+                            <button class="btn btn-primary app-control" id="update-chemistry-btn">
+                                🔄 تحديث الحسابات
+                            </button>
+                            <button class="btn btn-secondary app-control" id="auto-correction-btn">
+                                🛠️ تصحيح تلقائي مقترح
+                            </button>
+                        </div>
+
+                        <div class="comparison-actions" style="margin-top: 20px;">
+                            <button class="btn btn-success app-control" id="save-comparison-btn">
+                                💾 حفظ المقارنة
+                            </button>
+                            <button class="btn btn-primary app-control" id="view-comparisons-btn">
+                                📊 عرض المقارنات السابقة
+                            </button>
+                        </div>
+                    </div>
+                
+                    <div id="comparisons-history-container" style="display: none; margin-top: 30px;">
+                        <h4>📊 المقارنات المحفوظة</h4>
+                        <div id="saved-comparisons-list"></div>
+                    </div>
+                </div>
+                
+                <!-- ================= TAB 9: مكتبة الوصفات ================= -->
+                <div class="tab-panel" id="library">
+                    <h2>💾 مكتبة الوصفات</h2>
+                    <div class="library-controls">
+                        <input type="text" id="recipe-name-input" placeholder="أدخل اسمًا للوصفة الحالية..." class="app-control">
+                        <button class="btn btn-success app-control" id="save-recipe-btn">💾 حفظ الوصفة</button>
+                    </div>
+                    <div id="recipe-library-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= عناصر النظام المحسنة ================= -->
+    <!-- مؤشر التحميل العالمي -->
+    <div id="global-loader" style="display: none;"></div>
+
+    <!-- حاوية النوافذ المنبثقة -->
+    <div id="modal-container"></div>
+
+    <!-- ملاحظات إضافية للمقارنات (مخفي) -->
+    <div style="display: none;">
+        <textarea id="comparison-notes" placeholder="أضف ملاحظاتك حول هذه المقارنة..." class="app-control"></textarea>
+    </div>
+
+    <script src="core.js" defer></script>
+    <script src="ui.js" defer></script>
+    <script src="main.js" defer></script>
+
+    <script>
+        // إضافة أنماط CSS ديناميكية للتحميل إذا لم تكن موجودة
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!document.querySelector('#dynamic-styles')) {
+                const style = document.createElement('style');
+                style.id = 'dynamic-styles';
+                style.textContent = `
+                    #global-loader {
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: rgba(0, 0, 0, 0.8);
+                        color: white;
+                        padding: 20px;
+                        border-radius: 10px;
+                        z-index: 10000;
+                        display: none;
+                        align-items: center;
+                        justify-content: center;
+                        flex-direction: column;
+                        gap: 10px;
+                    }
+                    
+                    .loading-spinner {
+                        text-align: center;
+                        padding: 10px;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                    }
+                    
+                    .modal-overlay {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.5);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 10000;
+                        animation: fadeIn 0.3s ease;
+                    }
+                    
+                    @keyframes fadeIn {
+                        from { opacity: 0; }
+                        to { opacity: 1; }
+                    }
+                    
+                    .btn:disabled {
+                        cursor: not-allowed;
+                        opacity: 0.6;
+                    }
+                    
+                    /* تحسينات للاستجابة على الأجهزة المحمولة */
+                    @media (max-width: 768px) {
+                        .container {
+                            padding: 10px;
+                        }
+                        
+                        .tab-buttons {
+                            flex-wrap: wrap;
+                            gap: 5px;
+                        }
+                        
+                        .tab-btn {
+                            flex: 1;
+                            min-width: 120px;
+                            font-size: 0.9em;
+                            padding: 8px 12px;
+                        }
+                        
+                        .input-grid {
+                            grid-template-columns: 1fr;
+                            gap: 10px;
+                        }
+                        
+                        .result-box {
+                            padding: 15px;
+                            margin: 10px 0;
+                        }
+                        
+                        .chemistry-controls .input-grid {
+                            grid-template-columns: 1fr;
+                        }
+                    }
+                    
+                    @media (max-width: 480px) {
+                        .tab-btn {
+                            font-size: 0.8em;
+                            padding: 6px 8px;
+                        }
+                        
+                        h1 {
+                            font-size: 1.5em;
+                        }
+                        
+                        h2 {
+                            font-size: 1.3em;
+                        }
+                        
+                        .button-group {
+                            flex-direction: column;
+                            gap: 10px;
+                        }
+                        
+                        .button-group .btn {
+                            width: 100%;
+                        }
+                    }
+                    
+                    /* تحسينات إضافية للكيمياء */
+                    .chemistry-metric {
+                        background: var(--bg-secondary);
+                        padding: 15px;
+                        border-radius: 8px;
+                        margin: 10px 0;
+                        border-left: 4px solid var(--primary-color);
+                    }
+                    
+                    .chemistry-metric .metric-value {
+                        font-size: 1.5em;
+                        font-weight: bold;
+                        margin: 5px 0;
+                    }
+                    
+                    .chemistry-metric .metric-description {
+                        color: var(--text-muted);
+                        font-size: 0.9em;
+                    }
+                    
+                    .compatibility-score {
+                        text-align: center;
+                        padding: 20px;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        border-radius: 10px;
+                        margin: 20px 0;
+                    }
+
+                    /* أنماط التحميل المتحركة */
+                    .loading-pulse {
+                        animation: pulse 1.5s ease-in-out infinite;
+                    }
+
+                    @keyframes pulse {
+                        0% { opacity: 1; }
+                        50% { opacity: 0.5; }
+                        100% { opacity: 1; }
+                    }
+
+                    /* تحسينات إضافية للواجهة */
+                    .app-control:focus {
+                        outline: 2px solid var(--primary-color);
+                        outline-offset: 2px;
+                    }
+
+                    .btn.app-control {
+                        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    }
+
+                    .btn.app-control:hover:not(:disabled) {
+                        transform: translateY(-1px);
+                        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+
+            // إضافة فئة التحميل للجسم عند الحاجة
+            const originalSetLoadingState = window.setLoadingState;
+            if (originalSetLoadingState) {
+                window.setLoadingState = function(loading, message) {
+                    if (loading) {
+                        document.body.classList.add('loading');
+                    } else {
+                        document.body.classList.remove('loading');
+                    }
+                    return originalSetLoadingState(loading, message);
+                };
+            }
+        });
+
+        // تهيئة أولية للعناصر
+        document.addEventListener('DOMContentLoaded', function() {
+            // إضافة فئة app-control للأزرار الديناميكية التي قد تنشأ لاحقاً
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    mutation.addedNodes.forEach(function(node) {
+                        if (node.nodeType === 1) { // Element node
+                            // إضافة فئة app-control للأزرار الجديدة
+                            const buttons = node.querySelectorAll ? node.querySelectorAll('button:not(.ignore-loading)') : [];
+                            buttons.forEach(btn => {
+                                if (!btn.classList.contains('app-control')) {
+                                    btn.classList.add('app-control');
+                                }
+                            });
+
+                            // إضافة فئة app-control للعناصر القابلة للنقر
+                            const clickables = node.querySelectorAll ? node.querySelectorAll('.btn:not(.ignore-loading), .btn-toggle:not(.ignore-loading)') : [];
+                            clickables.forEach(el => {
+                                if (!el.classList.contains('app-control')) {
+                                    el.classList.add('app-control');
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+
+            // بدء المراقبة
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
+            });
+        });
+    </script>
+</body>
+</html>
