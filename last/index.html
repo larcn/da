@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Medovik Smart Bakery OS</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="app-header">
+    <h1>Medovik Smart Bakery OS</h1>
+    <div class="subtitle">المختبر الذكي لتحليل وتحسين عجينة الميدوفيك والحشوات</div>
+  </header>
+
+  <nav class="tabs-nav">
+    <button class="tab-btn active" data-tab="lab">🔬 المحلل العلمي</button>
+    <button class="tab-btn" data-tab="engineering">🧮 الهندسة</button>
+    <button class="tab-btn" data-tab="filling">🍰 الحشوة الذكية</button>
+    <button class="tab-btn" data-tab="processing">⚙️ المعالجة</button>
+  </nav>
+
+  <main class="tabs-container">
+
+    <!-- The Lab -->
+    <section id="lab" class="tab-panel active">
+      <div class="panel-grid">
+        <div class="card">
+          <h3>مقادير العجين (جم)</h3>
+          <div class="input-grid">
+            <div class="input-group">
+              <label for="flour">دقيق</label>
+              <input type="number" id="flour" min="0" step="1" value="500">
+            </div>
+            <div class="input-group">
+              <label for="butter">زبدة</label>
+              <input type="number" id="butter" min="0" step="1" value="120">
+            </div>
+            <div class="input-group">
+              <label for="sugar">سكر</label>
+              <input type="number" id="sugar" min="0" step="1" value="200">
+            </div>
+            <div class="input-group">
+              <label for="honey">عسل</label>
+              <input type="number" id="honey" min="0" step="1" value="100">
+            </div>
+            <div class="input-group">
+              <label for="eggs">بيض</label>
+              <input type="number" id="eggs" min="0" step="1" value="95">
+            </div>
+            <div class="input-group">
+              <label for="soda">صودا الخبز</label>
+              <input type="number" id="soda" min="0" step="0.1" value="5.5">
+            </div>
+          </div>
+
+          <div class="hr"></div>
+
+          <h4>كرملة العسل</h4>
+          <div class="caramelization-grid">
+            <label class="switch">
+              <input type="checkbox" id="caramelization-enabled">
+              <span>تفعيل الكرملة</span>
+            </label>
+            <div class="input-group small">
+              <label for="caramelization-Tpre">T_pre (°C)</label>
+              <input type="number" id="caramelization-Tpre" min="105" max="110" step="1" value="108">
+            </div>
+            <div class="input-group small">
+              <label for="caramelization-tpre">t_pre (دقيقة)</label>
+              <input type="number" id="caramelization-tpre" min="1.5" max="3" step="0.1" value="2.0">
+            </div>
+            <div class="input-group small">
+              <label for="caramelization-evap">evap (تبخّر)</label>
+              <input type="number" id="caramelization-evap" min="0.05" max="0.10" step="0.01" value="0.08">
+            </div>
+          </div>
+
+          <div class="buttons-row">
+            <button class="btn primary" id="analyze-btn">تحليل الوصفة</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>نتائج التحليل</h3>
+          <div id="analysis-results-wrapper"></div>
+          <div id="advisor-report-container" class="mt-10"></div>
+        </div>
+
+        <div class="card">
+          <h3>لوحة المطبخ</h3>
+          <div id="kitchen-dashboard-container"></div>
+        </div>
+
+        <div class="card">
+          <h3>مكتبة الوصفات (العجين)</h3>
+          <div class="buttons-row">
+            <button class="btn" id="save-recipe-btn">حفظ الوصفة الحالية</button>
+            <button class="btn" id="export-recipe-btn">تصدير</button>
+            <label class="btn">
+              استيراد
+              <input type="file" id="import-recipe-input" style="display:none;">
+            </label>
+          </div>
+          <div id="recipe-library-container" class="mt-10"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Engineering -->
+    <section id="engineering" class="tab-panel">
+      <div class="panel-grid">
+        <div class="card">
+          <h3>وضع الحساب</h3>
+          <div id="scaling-mode-toggle" class="toggle-row">
+            <button class="btn btn-toggle active" data-mode="normal">عادي</button>
+            <button class="btn btn-toggle" data-mode="advanced">متقدم</button>
+            <button class="btn btn-toggle" data-mode="reverse">عكسي</button>
+          </div>
+        </div>
+
+        <!-- Normal mode -->
+        <div class="card scaling-mode-panel active" data-panel="normal">
+          <h3>طبقة: مساحة × سماكة</h3>
+          <div class="subgrid">
+            <div>
+              <h4>شكل الصينية</h4>
+              <div class="pan-shape-selector" data-target="normal">
+                <label><input type="radio" name="pan-shape-normal" value="round" checked> دائرية</label>
+                <label><input type="radio" name="pan-shape-normal" value="rectangle"> مستطيلة</label>
+              </div>
+              <div id="pan-inputs-normal" class="input-inline">
+                <div class="input-group">
+                  <label for="pan-dim1-normal">القطر (سم)</label>
+                  <input type="number" id="pan-dim1-normal" value="24" min="10" max="50">
+                </div>
+              </div>
+              <div class="input-group small">
+                <label for="layer-thickness-normal">السماكة (مم)</label>
+                <input type="number" id="layer-thickness-normal" value="2" min="1" max="5" step="0.5">
+              </div>
+            </div>
+            <div class="buttons-col">
+              <button class="btn primary" id="calculate-layers-normal-btn">احسب الطبقات</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Advanced mode -->
+        <div class="card scaling-mode-panel" data-panel="advanced">
+          <h3>تحجيم متقدم</h3>
+          <div class="input-grid">
+            <div class="input-group">
+              <label for="target-layer-weight">وزن الطبقة (جم)</label>
+              <input type="number" id="target-layer-weight" min="50" max="300" step="1" value="120">
+            </div>
+            <div class="input-group">
+              <label for="target-layer-count">عدد الطبقات</label>
+              <input type="number" id="target-layer-count" min="1" max="20" step="1" value="8">
+            </div>
+            <div class="input-group">
+              <label for="extra-for-crumbs">فاقد/فتات (%)</label>
+              <input type="number" id="extra-for-crumbs" min="0" max="30" step="1" value="10">
+            </div>
+          </div>
+          <button class="btn primary" id="calculate-scaling-advanced-btn">تحجيم متقدم</button>
+        </div>
+
+        <!-- Reverse mode -->
+        <div class="card scaling-mode-panel" data-panel="reverse">
+          <h3>حساب المقادير المطلوبة</h3>
+          <div class="subgrid">
+            <div>
+              <h4>شكل الصينية</h4>
+              <div class="pan-shape-selector" data-target="reverse">
+                <label><input type="radio" name="pan-shape-reverse" value="round" checked> دائرية</label>
+                <label><input type="radio" name="pan-shape-reverse" value="rectangle"> مستطيلة</label>
+              </div>
+              <div id="pan-inputs-reverse" class="input-inline">
+                <div class="input-group">
+                  <label for="pan-dim1-reverse">القطر (سم)</label>
+                  <input type="number" id="pan-dim1-reverse" value="24" min="10" max="50">
+                </div>
+              </div>
+              <div class="input-group small">
+                <label for="layer-thickness-reverse">السماكة (مم)</label>
+                <input type="number" id="layer-thickness-reverse" value="2" min="1" max="5" step="0.5">
+              </div>
+              <div class="input-group small">
+                <label for="target-layers-reverse">عدد الطبقات</label>
+                <input type="number" id="target-layers-reverse" value="8" min="1" max="20">
+              </div>
+            </div>
+            <div class="buttons-col">
+              <button class="btn primary" id="calculate-scaling-reverse-btn">احسب المقادير</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- معايرة الكثافة -->
+        <div class="card">
+          <h3>⚖️ معايرة الكثافة</h3>
+          <p class="muted">لنتائج دقيقة، قم بقياس كثافة عجينك الفعلي</p>
+          <div class="input-grid">
+            <div class="input-group">
+              <label for="calibrate-weight">وزن الطبقة المخبوزة (جم)</label>
+              <input type="number" id="calibrate-weight" min="50" max="500" value="120">
+            </div>
+            <div class="input-group">
+              <label for="calibrate-diameter">قطر الصينية (سم)</label>
+              <input type="number" id="calibrate-diameter" value="24" min="10" max="50">
+            </div>
+            <div class="input-group">
+              <label for="calibrate-thickness">سماكة الطبقة (مم)</label>
+              <input type="number" id="calibrate-thickness" value="2" min="1" max="5" step="0.5">
+            </div>
+          </div>
+          <button class="btn primary" id="calibrate-density-btn">معايرة الكثافة</button>
+          <div id="calibration-result"></div>
+        </div>
+
+        <div class="card">
+          <h3>نتائج الهندسة</h3>
+          <div id="scaling-results-container"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Smart Filling -->
+    <section id="filling" class="tab-panel">
+      <div class="panel-grid">
+        <div class="card">
+          <h3>مواصفات الصينية وعدد الطبقات</h3>
+          <div class="input-grid">
+            <div class="input-group">
+              <label for="filling-pan-shape">شكل الصينية</label>
+              <select id="filling-pan-shape">
+                <option value="round" selected>دائرية</option>
+                <option value="rectangle">مستطيلة</option>
+              </select>
+            </div>
+            <div class="input-group">
+              <label for="filling-pan-dim1">القطر/الطول (سم)</label>
+              <input type="number" id="filling-pan-dim1" min="10" max="60" value="24">
+            </div>
+            <div class="input-group">
+              <label for="filling-pan-dim2">العرض (سم)</label>
+              <input type="number" id="filling-pan-dim2" min="10" max="60" placeholder="للمستطيلة فقط">
+            </div>
+            <div class="input-group">
+              <label for="filling-layers">عدد طبقات الكيك</label>
+              <input type="number" id="filling-layers" min="1" max="20" value="8">
+            </div>
+            <div class="input-group">
+              <label for="filling-thickness">سماكة الحشو لكل طبقة (مم)</label>
+              <input type="number" id="filling-thickness" min="2" max="10" step="0.5" value="5">
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>مكونات الحشوة (إدخال حر)</h3>
+          <div id="filling-dynamic-ingredients"></div>
+          <div class="input-grid" style="margin-top:8px;">
+            <div class="input-group">
+              <label for="sweetness-reduction">تقليل الحلاوة (%)</label>
+              <input type="range" id="sweetness-reduction" min="0" max="50" step="5" value="0">
+              <small class="muted">القيمة الحالية: <span id="sweetness-reduction-value">0%</span></small>
+            </div>
+          </div>
+          <div class="buttons-row">
+            <button class="btn primary" id="generate-protocol-btn">توليد بروتوكول التحضير</button>
+            <button class="btn" id="save-filling-btn">حفظ هذه الحشوة</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>نتائج الحشوة</h3>
+          <div id="filling-results-container"></div>
+        </div>
+
+        <div class="card">
+          <h3>بروتوكول التحضير</h3>
+          <div id="preparation-protocol-container"></div>
+        </div>
+
+        <div class="card">
+          <h3>مكتبة الحشوات المخصصة</h3>
+          <div id="filling-library-container"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Processing -->
+    <section id="processing" class="tab-panel">
+      <div class="panel-grid">
+
+        <div class="card">
+          <h3>📖 طريقة تحضير العجين</h3>
+          <div class="toggle-row" style="margin-bottom: 15px;">
+            <button class="btn btn-toggle active" id="method-scientific">الطريقة الكلاسيكية (توصية الشيف)</button>
+            <button class="btn btn-toggle" id="method-allinone">طريقة الكل في واحد</button>
+          </div>
+          <div id="dough-method-container">
+            <!-- سيتم ملؤه بواسطة UI.js -->
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>حاسبة التمبرنج</h3>
+          <div class="input-grid">
+            <div class="input-group">
+              <label for="tempering-egg-mass">وزن البيض (جم)</label>
+              <input type="number" id="tempering-egg-mass" min="1" max="1000" step="1" value="150">
+            </div>
+            <div class="input-group">
+              <label for="tempering-egg-temp">حرارة البيض (°C)</label>
+              <input type="number" id="tempering-egg-temp" min="0" max="30" step="0.5" value="20">
+            </div>
+            <div class="input-group">
+              <label for="tempering-liquid-mass">وزن الخليط الساخن (جم)</label>
+              <input type="number" id="tempering-liquid-mass" min="1" max="5000" step="1" value="600">
+            </div>
+            <div class="input-group">
+              <label for="tempering-liquid-temp">حرارة الخليط (°C)</label>
+              <input type="number" id="tempering-liquid-temp" min="60" max="120" step="1" value="85">
+            </div>
+            <div class="input-group">
+              <label for="tempering-batch-count">عدد الدفعات</label>
+              <input type="number" id="tempering-batch-count" min="2" max="10" step="1" value="5">
+            </div>
+          </div>
+          <div class="buttons-row">
+            <button class="btn primary" id="calculate-tempering-btn">حساب التمبرنج</button>
+            <button class="btn" id="autofill-tempering-btn">ملء تلقائي من الوصفة</button>
+          </div>
+          <div id="tempering-results-container" class="mt-10"></div>
+          <div id="compatibility-alerts-container" class="mt-10"></div>
+        </div>
+
+        <div class="card">
+          <h3>محاكاة الخبز</h3>
+          <div class="input-grid">
+            <div class="input-group">
+              <label for="oven-temp">حرارة الفرن (°C)</label>
+              <input type="number" id="oven-temp" min="120" max="240" step="5" value="180">
+            </div>
+            <div class="input-group">
+              <label for="baking-time">الوقت (دقيقة)</label>
+              <input type="number" id="baking-time" min="3" max="20" step="1" value="7">
+            </div>
+            <div class="input-group">
+              <label for="layer-thickness-simulation">سماكة الطبقة (مم)</label>
+              <input type="number" id="layer-thickness-simulation" min="1" max="5" step="0.5" value="3">
+            </div>
+          </div>
+          <div class="buttons-row">
+            <button class="btn" id="simulate-baking-btn">تشغيل المحاكاة</button>
+          </div>
+          <div id="baking-simulation-results" class="mt-10"></div>
+        </div>
+
+        <div class="card">
+          <h3>التقرير الكيميائي الشامل</h3>
+          <div id="compatibility-report-container"></div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <div>© 2025 Medovik Smart Bakery OS — جميع الحقوق محفوظة</div>
+  </footer>
+
+  <!-- Load order: core.js → fillings-data.js → ui.js → main.js → app-controller.js -->
+  <script src="core.js"></script>
+  <script src="fillings-data.js"></script>
+  <script src="ui.js"></script>
+  <script src="main.js"></script>
+  <script src="app-controller.js"></script>
+
+  <!-- Tabs switcher (no inline handlers) -->
+  <script>
+    (function() {
+      const nav = document.querySelector('.tabs-nav');
+      const buttons = document.querySelectorAll('.tab-btn');
+      const panels = document.querySelectorAll('.tab-panel');
+      if (nav) {
+        nav.addEventListener('click', (e) => {
+          const btn = e.target.closest('.tab-btn');
+          if (!btn) return;
+          const id = btn.dataset.tab;
+          buttons.forEach(b => b.classList.remove('active'));
+          panels.forEach(p => p.classList.remove('active'));
+          btn.classList.add('active');
+          const panel = document.getElementById(id);
+          if (panel) panel.classList.add('active');
+        });
+      }
+      // Initialize some dynamic areas
+      if (window.UIRenderer && typeof window.UIRenderer.renderDynamicFillingInputs === 'function') {
+        window.UIRenderer.renderDynamicFillingInputs();
+      }
+    })();
+  </script>
+</body>
+</html>
